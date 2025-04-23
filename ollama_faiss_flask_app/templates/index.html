@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Research Papers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">📄 Fetched Research Papers</h1>
+        {% if papers %}
+            {% for paper in papers %}
+            <div class="card shadow-sm p-4 mb-4">
+                <h4>{{ paper.title }}</h4>
+                <p>{{ paper.abstract }}</p>
+                <p><a href="{{ paper.link }}" target="_blank">🔗 Read Full Paper</a></p>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-info summarize-btn" data-abstract="{{ paper.abstract|e }}">Summarize</button>
+                    <button class="btn btn-sm btn-secondary citation-btn" data-title="{{ paper.title|e }}">Generate Citation</button>
+                </div>
+
+                <div class="summary mt-3 fw-bold text-primary"></div>
+                <div class="citation mt-2 text-dark fst-italic"></div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-warning">No papers loaded. Please restart the server with papers fetched.</div>
+        {% endif %}
+    </div>
+
+    <script>
+    // Summarize abstract
+    document.querySelectorAll('.summarize-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const abstract = btn.getAttribute('data-abstract');
+            const summaryDiv = btn.closest('.card').querySelector('.summary');
+            summaryDiv.innerHTML = '⏳ Summarizing...';
+            const response = await fetch('/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ abstract: abstract })
+            });
+            const data = await response.json();
+            summaryDiv.innerHTML = `<strong>Summary:</strong> ${data.summary}`;
+        });
+    });
+
+    // Generate citation
+    document.querySelectorAll('.citation-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const title = btn.getAttribute('data-title');
+            const citationDiv = btn.closest('.card').querySelector('.citation');
+            citationDiv.innerHTML = '⏳ Generating citation...';
+            const formData = new FormData();
+            formData.append('title', title);
+            const response = await fetch('/citation', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            citationDiv.innerHTML = `<strong>Citation:</strong> ${data.citation}`;
+        });
+    });
+    </script>
+</body>
+</html>

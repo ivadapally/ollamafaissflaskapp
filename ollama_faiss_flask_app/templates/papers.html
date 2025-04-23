@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fetched Papers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">📄 Fetched Papers</h2>
+        {% for paper in papers %}
+        <div class="card shadow-sm p-4 mb-3">
+            <h4>{{ paper.title }}</h4>
+            <p>{{ paper.abstract }}</p>
+            <a href="{{ paper.link }}" target="_blank" class="btn btn-sm btn-outline-primary mb-2">Read Full Paper</a>
+            <button class="btn btn-sm btn-info summarize-btn" data-abstract="{{ paper.abstract|e }}">Summarize</button>
+            <div class="summary mt-2 text-dark fw-semibold"></div>
+        </div>
+        {% endfor %}
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">⬅️ Back</a>
+        </div>
+    </div>
+
+    <script>
+    document.querySelectorAll('.summarize-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const abstract = btn.getAttribute('data-abstract');
+            const summaryDiv = btn.nextElementSibling;
+
+            summaryDiv.innerHTML = '⏳ Summarizing...';
+            const response = await fetch('/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ abstract: abstract })
+            });
+
+            const data = await response.json();
+            summaryDiv.innerHTML = `<strong>Summary:</strong> ${data.summary}`;
+        });
+    });
+    </script>
+</body>
+</html>

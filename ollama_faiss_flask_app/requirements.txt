@@ -1,0 +1,7 @@
+faiss-cpu
+sentence-transformers
+requests
+ollama
+pdfplumber
+scholarly
+flask
